@@ -18,11 +18,6 @@ export interface ExampleItem {
 }
 
 export interface UserProfile {
-  /** preset id (e.g. 'developer') or 'custom' */
-  role: string;
-  /** human-friendly label shown in the UI */
-  roleLabel: string;
-  roleDescription?: string;
   productiveExamples: ExampleItem[];
   unproductiveExamples: ExampleItem[];
   createdAt: number;
@@ -91,8 +86,6 @@ export interface Stats {
 export interface Meta {
   /** bump (to Date.now()) to invalidate every cached classification */
   vectorsBuiltAt: number;
-  modelId: string;
-  schemaVersion: number;
 }
 
 export interface CachedClassification {
@@ -191,7 +184,6 @@ export type Message =
   | { type: 'classifyBatch'; items: ClassifyItem[] }
   | { type: 'recordEvent'; event: GameEventType; videoId?: string }
   | { type: 'scrapeSample' }
-  | { type: 'scanHomepage' }
   | { type: 'scanCluster' }
   | { type: 'calibrate'; productive: string[]; unproductive: string[]; sampleTitles: string[] }
   | { type: 'recalibrate' }

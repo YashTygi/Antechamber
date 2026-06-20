@@ -73,15 +73,11 @@ export const DEFAULT_STATS: Stats = {
 
 export const DEFAULT_META: Meta = {
   vectorsBuiltAt: 0,
-  modelId: MODEL_ID,
-  schemaVersion: 1,
 };
 
 export interface PresetRole {
   id: string;
   label: string;
-  emoji: string;
-  description: string;
   productive: string[];
   unproductive: string[];
 }
@@ -91,8 +87,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'developer',
     label: 'Software Developer',
-    emoji: '💻',
-    description: 'Coding, system design, dev tools',
     productive: [
       'data structures and algorithms tutorial',
       'system design interview',
@@ -113,8 +107,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'student',
     label: 'Student / Learner',
-    emoji: '📚',
-    description: 'Lectures, exam prep, study habits',
     productive: [
       'calculus explained step by step',
       'study with me pomodoro',
@@ -135,8 +127,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'medstudent',
     label: 'Medical Student',
-    emoji: '🩺',
-    description: 'Anatomy, boards, clinical cases',
     productive: [
       'anatomy lecture full',
       'usmle step 1 review',
@@ -157,8 +147,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'designer',
     label: 'Designer',
-    emoji: '🎨',
-    description: 'UI/UX, tools, design theory',
     productive: [
       'figma tutorial for beginners',
       'ui ux design principles',
@@ -179,8 +167,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'creator',
     label: 'Content Creator',
-    emoji: '🎬',
-    description: 'Editing, growth, storytelling',
     productive: [
       'video editing tutorial',
       'how to grow on youtube',
@@ -201,8 +187,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'finance',
     label: 'Finance / Business',
-    emoji: '📈',
-    description: 'Investing, markets, startups',
     productive: [
       'investing for beginners',
       'stock market analysis',
@@ -223,8 +207,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'fitness',
     label: 'Fitness / Health',
-    emoji: '🏋️',
-    description: 'Workouts, nutrition, wellness',
     productive: [
       'full body workout at home',
       'healthy meal prep for the week',
@@ -245,8 +227,6 @@ export const PRESET_ROLES: PresetRole[] = [
   {
     id: 'custom',
     label: 'Something else',
-    emoji: '✨',
-    description: 'Start from scratch with your own topics',
     productive: [],
     unproductive: [],
   },

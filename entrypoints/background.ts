@@ -487,15 +487,13 @@ export default defineBackground(() => {
 
   /* ----------------- homepage scan (for calibration) ------------------ */
 
-  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
   async function pollSamples(tabId: number, ms: number, target: number, seed: VideoSample[] = []): Promise<VideoSample[]> {
     const deadline = Date.now() + ms;
     // Union by videoId across polls: each scrape scrolls the feed and may load
     // new cards (and drop old ones via virtualization), so we accumulate.
     const byId = new Map<string, VideoSample>(seed.map((s) => [s.videoId, s]));
     while (Date.now() < deadline) {
-      await delay(700);
+      await sleep(700);
       try {
         const res = (await browser.tabs.sendMessage(tabId, { type: 'scrapeSample' })) as ScrapeSampleResponse;
         for (const s of res?.samples ?? []) if (!byId.has(s.videoId)) byId.set(s.videoId, s);
@@ -682,7 +680,6 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener(async (msg: Message) => {
     if (msg?.type === 'classifyBatch') return classifyItems(msg.items);
     if (msg?.type === 'recordEvent') return recordEvent(msg.event);
-    if (msg?.type === 'scanHomepage') return scanHomepage();
     if (msg?.type === 'scanCluster') return scanCluster();
     if (msg?.type === 'calibrate') return calibrate(msg.productive, msg.unproductive, msg.sampleTitles);
     if (msg?.type === 'recalibrate') return recalibrate();

@@ -87,13 +87,6 @@ export async function idbDelMany(store: StoreName, keys: IDBValidKey[]): Promise
   return txDone(t);
 }
 
-export async function idbClear(store: StoreName): Promise<void> {
-  const db = await openDb();
-  const t = db.transaction(store, 'readwrite');
-  t.objectStore(store).clear();
-  return txDone(t);
-}
-
 export async function idbCount(store: StoreName): Promise<number> {
   const db = await openDb();
   return reqProm(db.transaction(store, 'readonly').objectStore(store).count());
@@ -119,16 +112,4 @@ export async function idbEvictLRU(store: StoreName, max: number): Promise<void> 
   entries.sort((a, b) => (a.value?.t ?? 0) - (b.value?.t ?? 0));
   const remove = entries.slice(0, count - max).map((e) => e.key);
   await idbDelMany(store, remove);
-}
-
-export async function idbStorageEstimate(): Promise<{ usage: number; quota: number } | null> {
-  try {
-    if (navigator.storage?.estimate) {
-      const e = await navigator.storage.estimate();
-      return { usage: e.usage ?? 0, quota: e.quota ?? 0 };
-    }
-  } catch {
-    /* not available */
-  }
-  return null;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   UserProfile,
   ExampleItem,
@@ -47,7 +47,7 @@ function Avatar({ src, name, size = 28 }: { src?: string | null; name: string; s
   );
 }
 
-export function Onboarding({ onDone }: { onDone: (p: UserProfile) => void }) {
+export function Onboarding({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
   const [interests, setInterests] = useState<string[]>([]);
   const [productive, setProductive] = useState<string[]>([]);
@@ -156,8 +156,6 @@ export function Onboarding({ onDone }: { onDone: (p: UserProfile) => void }) {
     const now = Date.now();
     const mk = (text: string): ExampleItem => ({ id: crypto.randomUUID(), text, source: 'onboarding', createdAt: now });
     const profile: UserProfile = {
-      role: 'custom',
-      roleLabel: interests.join(', ') || 'Custom',
       productiveExamples: prodTexts().map(mk),
       unproductiveExamples: unprodTexts().map(mk),
       createdAt: now,
@@ -181,7 +179,7 @@ export function Onboarding({ onDone }: { onDone: (p: UserProfile) => void }) {
       channelName: v.channelName,
     }));
     await commitOnboarding({ profile, settings, channelRatings, videoRatings });
-    onDone(profile);
+    onDone();
   };
 
   const pct = Math.round((step / (STEPS.length - 1)) * 100);

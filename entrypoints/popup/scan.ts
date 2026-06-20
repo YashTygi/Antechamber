@@ -1,7 +1,5 @@
 import { browser } from 'wxt/browser';
 import type {
-  VideoSample,
-  ScrapeSampleResponse,
   ScanClusterResponse,
   CalibrateResponse,
   OnboardingCommit,
@@ -11,17 +9,6 @@ import type {
   RecentResponse,
   Label,
 } from '@/lib/types';
-
-/** Ask the background to open a hidden YouTube homepage tab and report the
- *  videos it sees. Returns [] if it can't (logged out, blocked, timeout). */
-export async function scanHomepage(): Promise<VideoSample[]> {
-  try {
-    const res = (await browser.runtime.sendMessage({ type: 'scanHomepage' })) as ScrapeSampleResponse;
-    return res?.samples ?? [];
-  } catch {
-    return [];
-  }
-}
 
 /** Onboarding: scan the homepage, cluster videos by topic, and return a diverse
  *  set to rate + the channels seen + every title (for later calibration). */
