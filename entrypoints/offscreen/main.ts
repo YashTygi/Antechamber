@@ -14,6 +14,14 @@ import { MODEL_ID } from '@/lib/defaults';
  */
 
 env.allowLocalModels = false;
+// Don't try to stash the WASM in the browser Cache API. transformers.js
+// pre-fetches the binary and calls caches.put(), but Cache.put() rejects the
+// `chrome-extension://` request scheme our bundled WASM is served from, which
+// surfaces a noisy "Failed to cache … scheme 'chrome-extension' is unsupported"
+// warning. The WASM is already local to the extension, so caching buys nothing;
+// with this off, ORT loads it straight from wasmPaths. (The model-file cache for
+// the MiniLM download from huggingface.co is separate and still works.)
+(env as Record<string, unknown>).useWasmCache = false;
 // Point onnxruntime at the WASM files bundled at the extension root (copied
 // from public/). transformers 4.2.0 requests the *asyncify* variant on
 // non-Safari, and it only pre-fetches/caches the binary when wasmPaths is an

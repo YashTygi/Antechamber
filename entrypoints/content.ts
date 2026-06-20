@@ -188,6 +188,7 @@ export default defineContentScript({
       channelKey: string | null;
       channelName: string | null;
     } | null = null;
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
     async function evalWatch() {
       if (!active || evalInFlight) return;
@@ -203,26 +204,33 @@ export default defineContentScript({
 
       evalInFlight = true;
       try {
-        const label = await classifyOne(v.videoId, v.title, v.channelKey, v.channel);
-        if (!label) return;
-        const now = getWatchVideo();
-        if (!now || now.videoId !== v.videoId || detectSurface() !== 'watch') return;
+        // Let the title settle: right after SPA navigation getWatchVideo can still
+        // return the previous video's title, which flashes a wrong gate/chip before
+        // correcting. Only show once videoId+title are stable.
+        await sleep(350);
+        const s = getWatchVideo();
+        if (detectSurface() !== 'watch' || !s || s.videoId !== v.videoId || s.title !== v.title) {
+          if (detectSurface() === 'watch') scheduleEvalWatch();
+          return;
+        }
+        const label = await classifyOne(s.videoId, s.title, s.channelKey, s.channel);
+        if (!label || detectSurface() !== 'watch' || getWatchVideo()?.videoId !== s.videoId) return;
 
-        curVideo = { videoId: v.videoId, title: v.title, label, channelKey: v.channelKey, channelName: v.channel };
+        curVideo = { videoId: s.videoId, title: s.title, label, channelKey: s.channelKey, channelName: s.channel };
         if (settings!.frictionOn.includes(label)) {
           removeVerdict();
-          const shown = showFriction(v, label);
-          if (!shown) {
+          if (!showFriction(s, label)) {
             curVideo = null;
-            return; // player not ready → retry
+            scheduleEvalWatch(); // player not ready → retry
+            return;
           }
-          recordEvent('frictionShown', v.videoId);
+          recordEvent('frictionShown', s.videoId);
         } else {
-          if (label === 'productive') award('productiveOpened', v.videoId, 'Nice choice');
-          else if (label === 'unproductive') recordEvent('unproductiveOpened', v.videoId);
+          if (label === 'productive') award('productiveOpened', s.videoId, 'Nice choice');
+          else if (label === 'unproductive') recordEvent('unproductiveOpened', s.videoId);
           showVerdict();
         }
-        currentWatch = v.videoId;
+        currentWatch = s.videoId;
       } finally {
         evalInFlight = false;
       }
@@ -240,15 +248,19 @@ export default defineContentScript({
     let overlay: HTMLElement | null = null;
     let countdownTimer: number | undefined;
     let preMuted = false;
+    let frictionPlayGuard: (() => void) | null = null;
+    let frictionMedia: HTMLVideoElement | null = null;
 
     function dismissFriction() {
       if (countdownTimer) clearInterval(countdownTimer);
       countdownTimer = undefined;
+      if (frictionMedia && frictionPlayGuard) frictionMedia.removeEventListener('play', frictionPlayGuard);
+      frictionPlayGuard = null;
       overlay?.remove();
       overlay = null;
-      // Restore muted state; never touch play/pause to avoid corrupting YouTube's player state
       const pl = getPlayer();
       if (pl) pl.video.muted = preMuted;
+      frictionMedia = null;
     }
 
     function showFriction(
@@ -292,11 +304,16 @@ export default defineContentScript({
       if (getComputedStyle(player).position === 'static') player.style.position = 'relative';
       player.appendChild(overlay);
 
-      // Mute instead of pause — calling media.pause() directly bypasses YouTube's
-      // player state machine and triggers the "Something went wrong" error. Muting
-      // is sufficient friction without corrupting playback state.
+      // Stop playback the safe way: YouTube's own player API (pauseVideo), NOT
+      // media.pause() — the latter fights YT's state machine and triggers the
+      // "Something went wrong" error. Re-pause via the API if it tries to resume.
+      const ytp = player as unknown as { pauseVideo?: () => void; playVideo?: () => void };
       preMuted = media.muted;
       media.muted = true;
+      ytp.pauseVideo?.();
+      frictionPlayGuard = () => ytp.pauseVideo?.();
+      frictionMedia = media;
+      media.addEventListener('play', frictionPlayGuard);
 
       const watchBtn = overlay.querySelector('[data-act="watch"]') as HTMLButtonElement;
       const backBtn = overlay.querySelector('[data-act="back"]') as HTMLButtonElement;
@@ -335,18 +352,25 @@ export default defineContentScript({
 
       watchBtn.addEventListener('click', () => {
         if (watchBtn.disabled) return;
-        dismissFriction(); // restores muted state; video is already playing
+        dismissFriction();
+        ytp.playVideo?.();
         recordEvent('watchedAnyway', video.videoId);
         showVerdict(); // let them re-label after they chose to watch
       });
 
       wrongBtn.addEventListener('click', () => {
-        dismissFriction(); // restores muted state
+        dismissFriction();
+        ytp.playVideo?.();
         sendCorrection(video.videoId, video.title, 'productive', video.channelKey, video.channel);
       });
 
-      // keyboard: Esc = the safe default (Go back); Tab cycles within the card
+      // Keep keystrokes inside the gate (esp. typing a reason) from reaching
+      // YouTube's hotkeys — otherwise 'm' mutes, 'k' pauses, etc.
+      overlay.addEventListener('keyup', (e) => e.stopPropagation());
+      overlay.addEventListener('keypress', (e) => e.stopPropagation());
+      // Esc = the safe default (Go back); Tab cycles within the card.
       overlay.addEventListener('keydown', (e: KeyboardEvent) => {
+        e.stopPropagation();
         if (e.key === 'Escape') {
           e.preventDefault();
           backBtn.click();
@@ -524,7 +548,14 @@ export default defineContentScript({
       watchTimer = setTimeout(evalWatch, 250) as unknown as number;
     };
 
+    let navId: string | null = null;
     function onNav() {
+      // YouTube fires navigate events several times per navigation; only react
+      // when the watched video actually changes, so we don't tear down and
+      // re-show the gate/chip mid-load.
+      const id = detectSurface() === 'watch' ? getWatchVideo()?.videoId ?? null : null;
+      if (id !== null && id === navId) return;
+      navId = id;
       dismissFriction();
       removeVerdict();
       currentWatch = null;
