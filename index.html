@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antechamber — watch YouTube with intent</title>
+    <meta name="description" content="A browser extension that adds friction to YouTube distractions and rewards focus. Adaptive and fully on-device — private by default." />
+    <style>
+      :root {
+        --bg: #f4efe4;
+        --surface: #fcf9f2;
+        --surface-2: #f0e9db;
+        --line: rgba(62, 54, 40, 0.14);
+        --ink: #2e2a22;
+        --ink-dim: #6b6354;
+        --good: #2f6b49;
+        --good-soft: #deeddf;
+        --bad: #9c4a2b;
+        --reward: #8a6516;
+        --reward-mark: #c99a3a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 680px; margin: 0 auto; padding: 72px 24px 80px; }
+      .mark {
+        width: 56px; height: 56px; border-radius: 14px;
+        background: var(--surface); border: 1px solid var(--line);
+        display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+      }
+      .eyebrow {
+        font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--reward); margin: 0 0 12px;
+      }
+      h1 { font-size: 38px; line-height: 1.1; margin: 0 0 14px; letter-spacing: -0.02em; }
+      .lede { font-size: 18px; color: var(--ink-dim); margin: 0 0 30px; max-width: 560px; }
+      .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 44px; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px;
+        text-decoration: none; border: 1px solid var(--line); transition: all 0.12s;
+      }
+      .btn.primary { background: var(--good); color: #fbf7ee; border-color: var(--good); }
+      .btn.primary:hover { filter: brightness(1.06); }
+      .btn.ghost { background: var(--surface); color: var(--ink); }
+      .btn.ghost:hover { background: var(--surface-2); }
+      .feat { display: grid; gap: 14px; margin: 0 0 40px; }
+      .row {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .row h3 { margin: 0 0 4px; font-size: 15px; }
+      .row p { margin: 0; color: var(--ink-dim); font-size: 14px; }
+      .tag {
+        display: inline-block; font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.04em; padding: 3px 8px; border-radius: 999px;
+        background: var(--good-soft); color: var(--good); margin-right: 6px;
+      }
+      footer { color: var(--ink-dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 20px; }
+      footer a { color: var(--good); text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="mark" aria-hidden="true">
+        <!-- threshold mark: two posts under a low arch -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c99a3a" stroke-width="1.7" stroke-linecap="round">
+          <path d="M5 20V11a7 7 0 0 1 14 0v9" />
+          <path d="M5 20h14" />
+          <path d="M9.5 20v-6" />
+          <path d="M14.5 20v-6" />
+        </svg>
+      </div>
+
+      <p class="eyebrow">Antechamber</p>
+      <h1>Watch YouTube with intent.</h1>
+      <p class="lede">
+        A browser extension that puts a small, deliberate pause before distracting videos and
+        rewards you for staying focused. It learns what <em>you</em> find productive — and
+        does all of its thinking on your device.
+      </p>
+
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/YashTygi/Antechamber" rel="noopener">View on GitHub</a>
+        <a class="btn ghost" href="./privacy.html">Privacy Policy</a>
+      </div>
+
+      <div class="feat">
+        <div class="row"><h3>Friction, not blocking</h3><p>Distractions hit a calm, dismissible gate with a countdown — you stay in control.</p></div>
+        <div class="row"><h3>On-device &amp; adaptive</h3><p>A small model runs inside your browser, calibrates to your real homepage, and learns from your corrections live.</p></div>
+        <div class="row"><h3>Rewards for focus</h3><p>Productive viewing earns points, levels, and streaks.</p></div>
+        <div class="row"><h3>Private by default</h3><p><span class="tag">no servers</span><span class="tag">no tracking</span>Nothing leaves your machine.</p></div>
+      </div>
+
+      <footer>
+        Open source under the <a href="https://github.com/YashTygi/Antechamber/blob/main/LICENSE">MIT License</a>
+        · <a href="https://github.com/YashTygi/Antechamber">Source</a>
+        · <a href="./privacy.html">Privacy</a>
+      </footer>
+    </main>
+  </body>
+</html>

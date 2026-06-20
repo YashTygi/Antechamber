@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Antechamber worker</title>
+  </head>
+  <body>
+    <!-- Hidden offscreen document: hosts the WASM embedding model.
+         A real Document context (unlike a service worker) permits the dynamic
+         import() that onnxruntime-web uses to load its WASM glue. -->
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
