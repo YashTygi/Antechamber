@@ -3,108 +3,217 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antechamber — watch YouTube with intent</title>
-    <meta name="description" content="A browser extension that adds friction to YouTube distractions and rewards focus. Adaptive and fully on-device — private by default." />
+    <title>Antechamber — a small pause before YouTube distractions</title>
+    <meta name="description" content="“Is this worth your time?” A browser extension that puts a calm 5-second pause before distracting YouTube videos and rewards focus. Adaptive, on-device, private." />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#47936F" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Antechamber — a small pause before YouTube distractions" />
+    <meta property="og:description" content="“Is this worth your time?” A calm 5-second gate before distractions. Adaptive, on-device, private." />
+    <meta property="og:image" content="https://antechamber.yashtyagi.xyz/og.jpg" />
+    <meta property="og:url" content="https://antechamber.yashtyagi.xyz/" />
+    <meta name="twitter:card" content="summary_large_image" />
     <style>
       :root {
-        --bg: #f4efe4;
-        --surface: #fcf9f2;
-        --surface-2: #f0e9db;
-        --line: rgba(62, 54, 40, 0.14);
-        --ink: #2e2a22;
-        --ink-dim: #6b6354;
-        --good: #2f6b49;
-        --good-soft: #deeddf;
-        --bad: #9c4a2b;
-        --reward: #8a6516;
-        --reward-mark: #c99a3a;
+        --bg: #f4efe4; --surface: #fcf9f2; --surface-2: #f0e9db;
+        --line: rgba(62, 54, 40, 0.14); --line-strong: rgba(62, 54, 40, 0.26);
+        --ink: #2e2a22; --ink-dim: #6b6354; --ink-faint: #9a9282;
+        --good: #2f6b49; --good-soft: #deeddf; --good-mid: #c6e0c9; --good-border: #a9cbae;
+        --bad: #9c4a2b; --bad-soft: #f4dfd2; --bad-mid: #efcdb7; --bad-border: #ddb497;
+        --reward: #8a6516; --reward-soft: #f6e9cb; --reward-mid: #c99a3a; --reward-border: #e4ce97;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
       * { box-sizing: border-box; }
       body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--ink);
+        margin: 0; background: var(--bg); color: var(--ink);
         font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
-      .wrap { max-width: 680px; margin: 0 auto; padding: 72px 24px 80px; }
-      .mark {
-        width: 56px; height: 56px; margin-bottom: 22px;
-        display: flex; align-items: center; justify-content: center;
-      }
-      .mark svg { display: block; width: 56px; height: 56px; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 56px 24px 72px; }
+      .hero { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+      @media (min-width: 820px) { .hero { grid-template-columns: 1.05fr 0.95fr; gap: 48px; } }
+      .mark svg { display: block; width: 52px; height: 52px; }
       .eyebrow {
-        font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        letter-spacing: 0.14em; text-transform: uppercase; color: var(--reward); margin: 0 0 12px;
+        font: 600 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--reward); margin: 20px 0 12px;
       }
-      h1 { font-size: 38px; line-height: 1.1; margin: 0 0 14px; letter-spacing: -0.02em; }
-      .lede { font-size: 18px; color: var(--ink-dim); margin: 0 0 30px; max-width: 560px; }
-      .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 44px; }
+      h1 { font-size: 40px; line-height: 1.08; margin: 0 0 16px; letter-spacing: -0.02em; }
+      .lede { font-size: 18px; color: var(--ink-dim); margin: 0 0 26px; max-width: 520px; }
+      .lede b { color: var(--ink); font-weight: 600; }
+      .cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
       .btn {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px;
-        text-decoration: none; border: 1px solid var(--line); transition: all 0.12s;
+        display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 8px;
+        font-weight: 600; font-size: 14px; text-decoration: none; border: 1px solid var(--line); transition: all 0.12s;
       }
       .btn.primary { background: var(--good); color: #fbf7ee; border-color: var(--good); }
       .btn.primary:hover { filter: brightness(1.06); }
+      .btn.soon { background: var(--surface-2); color: var(--ink-faint); cursor: default; }
       .btn.ghost { background: var(--surface); color: var(--ink); }
       .btn.ghost:hover { background: var(--surface-2); }
-      .feat { display: grid; gap: 14px; margin: 0 0 40px; }
-      .row {
-        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-        padding: 16px 18px;
+      .in-review { font: 600 11px/1 var(--mono); letter-spacing: 0.06em; color: var(--ink-faint); margin: 14px 0 0; }
+      .in-review b { color: var(--reward); }
+
+      /* ---- live "gate" recreation (the GIF, but crisp + animated) ---- */
+      .stage {
+        position: relative; aspect-ratio: 16 / 11; border-radius: 14px; overflow: hidden;
+        border: 1px solid var(--line-strong); box-shadow: 0 24px 60px rgba(46, 42, 34, 0.16);
       }
-      .row h3 { margin: 0 0 4px; font-size: 15px; }
+      .stage .video { position: absolute; inset: 0; background: radial-gradient(120% 120% at 30% 20%, #c8c0ae, #a59c8a); }
+      .stage .pause {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35);
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .stage .pause i { width: 7px; height: 24px; border-radius: 2px; background: rgba(255, 255, 255, 0.55); }
+      .stage .scrim { position: absolute; inset: 0; background: rgba(244, 239, 228, 0.62); }
+      .card {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(88%, 360px);
+        background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px;
+        padding: 20px 22px 18px; animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+      .card .lab { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--reward); }
+      .card .q { font-size: 20px; font-weight: 600; margin: 9px 0 5px; letter-spacing: -0.01em; }
+      .card .vid { font-size: 12px; color: var(--ink-dim); margin-bottom: 16px; }
+      .card .acts { display: flex; gap: 11px; align-items: flex-end; }
+      .card .back {
+        display: inline-flex; align-items: center; gap: 6px; background: var(--good-soft);
+        border: 1px solid var(--good-border); color: var(--good); border-radius: 7px; padding: 10px 15px;
+        font-size: 13px; font-weight: 600;
+      }
+      .card .ww { flex: 1; }
+      .card .wr { display: flex; justify-content: space-between; color: var(--ink-dim); font-size: 13px; padding: 9px 2px 7px; }
+      .card .dep { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+      .card .dep i { display: block; height: 3px; width: 0; background: var(--reward-mid); border-radius: 3px; animation: fill 5s linear infinite; }
+      .card .wrong { margin-top: 12px; font-size: 12px; color: var(--ink-faint); }
+      @keyframes rise { from { opacity: 0; transform: translate(-50%, -44%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+      @keyframes fill { 0% { width: 0; } 90%, 100% { width: 100%; } }
+
+      /* ---- feature rows ---- */
+      .feat { display: grid; gap: 14px; margin: 56px 0 0; }
+      @media (min-width: 640px) { .feat { grid-template-columns: repeat(3, 1fr); } }
+      .row { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+      .row .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; vertical-align: middle; }
+      .row h3 { margin: 0 0 5px; font-size: 15px; }
       .row p { margin: 0; color: var(--ink-dim); font-size: 14px; }
-      .tag {
-        display: inline-block; font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        letter-spacing: 0.04em; padding: 3px 8px; border-radius: 999px;
-        background: var(--good-soft); color: var(--good); margin-right: 6px;
+
+      /* ---- feed badge demo ---- */
+      .demo { margin: 36px 0 0; }
+      .demo .cap { font: 600 11px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; }
+      .thumbs { display: flex; gap: 16px; flex-wrap: wrap; }
+      .thumb { position: relative; width: 200px; height: 112px; border-radius: 8px; border: 1px solid var(--line); }
+      .thumb.g { background: linear-gradient(135deg, #cfc8b8, #b8b0a0); }
+      .thumb.b { background: linear-gradient(135deg, #c9bca8, #b0a691); }
+      .pill {
+        position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 5px;
+        font: 500 11px/1 ui-sans-serif, system-ui, sans-serif; padding: 4px 9px; border-radius: 999px; border: 1px solid;
       }
-      footer { color: var(--ink-dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 20px; }
+      .pill.g { background: var(--good-mid); color: var(--good); border-color: var(--good-border); }
+      .pill.b { background: var(--bad-mid); color: var(--bad); border-color: var(--bad-border); }
+
+      /* ---- notify ---- */
+      .notify-wrap { margin: 48px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 22px; }
+      .notify-wrap h3 { margin: 0 0 4px; font-size: 17px; }
+      .notify-wrap p { margin: 0 0 16px; color: var(--ink-dim); font-size: 14px; }
+      .notify { display: flex; gap: 10px; flex-wrap: wrap; }
+      .notify input {
+        flex: 1; min-width: 220px; padding: 11px 14px; border-radius: 8px; border: 1px solid var(--line);
+        background: var(--bg); color: var(--ink); font-size: 15px; outline: none;
+      }
+      .notify input:focus { border-color: var(--line-strong); }
+      .notify button {
+        padding: 11px 20px; border-radius: 8px; border: 1px solid var(--good); background: var(--good);
+        color: #fbf7ee; font-weight: 600; font-size: 14px; cursor: pointer;
+      }
+      .notify button:hover { filter: brightness(1.06); }
+      .fineprint { font-size: 12px; color: var(--ink-faint); margin: 10px 0 0; }
+
+      footer { color: var(--ink-dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 20px; margin-top: 56px; }
       footer a { color: var(--good); text-decoration: none; }
       footer a:hover { text-decoration: underline; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .card { animation: none; }
+        .card .dep i { animation: none; width: 42%; }
+      }
     </style>
   </head>
   <body>
     <main class="wrap">
-      <div class="mark" aria-hidden="true">
-        <!-- Antechamber brand mark: portico under a low arch -->
-        <svg width="56" height="56" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="120" height="120" rx="16" fill="#47936F" />
-          <rect x="45.5312" y="60" width="10.2085" height="35" fill="#F4EEE0" />
-          <rect x="63.7598" y="60" width="10.2085" height="35" fill="#F4EEE0" />
-          <path d="M35 60H19V66H22V95H14V101H37V95H32V66H35V60Z" fill="#F4EEE0" />
-          <path d="M84 60H100V66H97V95H105V101H82V95H87V66H84V60Z" fill="#F4EEE0" />
-          <path d="M94.9689 53.4936C94.5835 44.1607 90.6359 35.3452 83.96 28.9091C77.2841 22.4729 68.4026 18.9202 59.1917 19.0014C49.9807 19.0825 41.1614 22.7911 34.5968 29.3439C28.0321 35.8966 24.2362 44.7804 24.0106 54.1186L30.7052 54.2849C30.8881 46.7081 33.9681 39.5002 39.2944 34.1835C44.6207 28.8668 51.7764 25.8578 59.2498 25.792C66.7233 25.7261 73.9294 28.6087 79.346 33.8307C84.7626 39.0528 87.9655 46.2054 88.2782 53.7778L94.9689 53.4936Z" fill="#F4EEE0" />
-        </svg>
-      </div>
+      <section class="hero">
+        <div>
+          <div class="mark" aria-hidden="true">
+            <svg width="52" height="52" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="120" height="120" rx="16" fill="#47936F" />
+              <rect x="45.5312" y="60" width="10.2085" height="35" fill="#F4EEE0" />
+              <rect x="63.7598" y="60" width="10.2085" height="35" fill="#F4EEE0" />
+              <path d="M35 60H19V66H22V95H14V101H37V95H32V66H35V60Z" fill="#F4EEE0" />
+              <path d="M84 60H100V66H97V95H105V101H82V95H87V66H84V60Z" fill="#F4EEE0" />
+              <path d="M94.9689 53.4936C94.5835 44.1607 90.6359 35.3452 83.96 28.9091C77.2841 22.4729 68.4026 18.9202 59.1917 19.0014C49.9807 19.0825 41.1614 22.7911 34.5968 29.3439C28.0321 35.8966 24.2362 44.7804 24.0106 54.1186L30.7052 54.2849C30.8881 46.7081 33.9681 39.5002 39.2944 34.1835C44.6207 28.8668 51.7764 25.8578 59.2498 25.792C66.7233 25.7261 73.9294 28.6087 79.346 33.8307C84.7626 39.0528 87.9655 46.2054 88.2782 53.7778L94.9689 53.4936Z" fill="#F4EEE0" />
+            </svg>
+          </div>
+          <p class="eyebrow">Antechamber</p>
+          <h1>A small pause before YouTube distractions.</h1>
+          <p class="lede">
+            It doesn’t block YouTube — it <b>interrupts autopilot</b>. Open something distracting and you get a
+            calm 5-second gate: <b>“Is this worth your time?”</b> It learns what you actually care about, on your device.
+          </p>
+          <div class="cta">
+            <!-- ON APPROVAL: replace this <span> with <a class="btn primary" href="CHROME_STORE_URL"> -->
+            <span class="btn soon">Get it on Chrome · Coming soon</span>
+            <a class="btn ghost" href="https://github.com/YashTygi/Antechamber" rel="noopener">View on GitHub</a>
+          </div>
+          <p class="in-review"><b>●</b> In review on the Chrome Web Store — drop your email below for launch day.</p>
+        </div>
 
-      <p class="eyebrow">Antechamber</p>
-      <h1>Watch YouTube with intent.</h1>
-      <p class="lede">
-        A browser extension that puts a small, deliberate pause before distracting videos and
-        rewards you for staying focused. It learns what <em>you</em> find productive — and
-        does all of its thinking on your device.
-      </p>
+        <div class="stage" aria-label="Preview of the Antechamber gate">
+          <div class="video"><div class="pause"><i></i><i></i></div></div>
+          <div class="scrim"></div>
+          <div class="card">
+            <div class="lab">Threshold</div>
+            <div class="q">Is this worth your time?</div>
+            <div class="vid">“Top 10 epic fails 2024” · DramaAlert</div>
+            <div class="acts">
+              <span class="back">← Go back</span>
+              <div class="ww">
+                <div class="wr"><span>Watch anyway</span><span>5</span></div>
+                <div class="dep"><i></i></div>
+              </div>
+            </div>
+            <div class="wrong">Marked wrong? It’s productive →</div>
+          </div>
+        </div>
+      </section>
 
-      <div class="cta">
-        <a class="btn primary" href="https://github.com/YashTygi/Antechamber" rel="noopener">View on GitHub</a>
-        <a class="btn ghost" href="./privacy.html">Privacy Policy</a>
-      </div>
+      <section class="feat">
+        <div class="row"><h3><span class="dot" style="background:var(--reward-mid)"></span>Tags every video</h3><p>Each video and channel gets a quiet productive / distraction tag, right in your feed.</p></div>
+        <div class="row"><h3><span class="dot" style="background:var(--bad)"></span>Gates the distractions</h3><p>A short, dismissible pause with a countdown — you decide, then go back or watch on.</p></div>
+        <div class="row"><h3><span class="dot" style="background:var(--good)"></span>Learns on your device</h3><p>Calibrates to your real homepage and adapts to your corrections. No servers, no tracking.</p></div>
+      </section>
 
-      <div class="feat">
-        <div class="row"><h3>Friction, not blocking</h3><p>Distractions hit a calm, dismissible gate with a countdown — you stay in control.</p></div>
-        <div class="row"><h3>On-device &amp; adaptive</h3><p>A small model runs inside your browser, calibrates to your real homepage, and learns from your corrections live.</p></div>
-        <div class="row"><h3>Rewards for focus</h3><p>Productive viewing earns points, levels, and streaks.</p></div>
-        <div class="row"><h3>Private by default</h3><p><span class="tag">no servers</span><span class="tag">no tracking</span>Nothing leaves your machine.</p></div>
-      </div>
+      <section class="demo">
+        <p class="cap">In your feed</p>
+        <div class="thumbs">
+          <div class="thumb g"><span class="pill g">✓ productive</span></div>
+          <div class="thumb b"><span class="pill b">✗ distraction</span></div>
+        </div>
+      </section>
+
+      <section class="notify-wrap">
+        <h3>Get notified at launch</h3>
+        <p>One email the moment it’s live on the Chrome Web Store. No spam, ever.</p>
+        <!-- REPLACE the form id below with your own (free at formspree.io → New form) -->
+        <form class="notify" action="https://formspree.io/f/your-form-id" method="POST">
+          <input type="email" name="email" required placeholder="you@email.com" aria-label="Email address" />
+          <input type="hidden" name="_subject" value="Antechamber launch waitlist" />
+          <input type="hidden" name="_next" value="https://antechamber.yashtyagi.xyz/?subscribed=1" />
+          <button type="submit">Notify me</button>
+        </form>
+        <p class="fineprint">Or just ⭐ the <a href="https://github.com/YashTygi/Antechamber" style="color:var(--good)">GitHub repo</a> to follow along.</p>
+      </section>
 
       <footer>
         Open source under the <a href="https://github.com/YashTygi/Antechamber/blob/main/LICENSE">MIT License</a>
