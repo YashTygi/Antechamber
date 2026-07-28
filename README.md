@@ -6,6 +6,10 @@
 
 <p align="center"><strong>Add friction to YouTube distractions and reward focus — adaptive, and fully on-device.</strong></p>
 
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/antechamber/fcnlefebdpcpcakfkkeimodcnmlgolil"><strong>Get it on the Chrome Web Store →</strong></a>
+</p>
+
 ---
 
 Antechamber is a browser extension that puts a small, deliberate pause in front of

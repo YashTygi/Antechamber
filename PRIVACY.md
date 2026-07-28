@@ -74,4 +74,4 @@ If this policy changes, the "Last updated" date above will change accordingly.
 
 ## Contact
 
-Questions about this policy: **yash.tyagi@bookswagon.in**
+Questions about this policy: **tygi.yash@gmail.com**
